@@ -1,0 +1,16 @@
+# Python & Virtual Environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pyd
+
+# Environment Variables & Secrets
+.env
+
+# Local Data / Audio Storage
+data/
+
+# IDE files
+.vscode/
+.idea/

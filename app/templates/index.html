@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video AI Summarizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <header class="text-center py-4">
+            <h1 class="text-3xl font-bold text-red-500">▶️ YouTube Video AI Summarizer</h1>
+            <p class="text-gray-400 text-sm mt-1">Extract instant insights, key takeaways, and core topics from any YouTube video using Whisper & Gemini</p>
+        </header>
+
+        <!-- Ingestion Form -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 space-y-4">
+            <h2 class="text-xl font-semibold text-red-400">Enter YouTube Video</h2>
+            <form id="processForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">YouTube Video URL:</label>
+                    <input type="text" id="youtube_url" placeholder="https://www.youtube.com/watch?v=..." required class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-red-500 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg transition duration-200">Summarize Video</button>
+            </form>
+            <div id="loading" class="hidden text-center text-yellow-400 font-medium">Downloading audio & analyzing video content... Please wait.</div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700 space-y-4">
+            <h2 class="text-xl font-semibold text-green-400">Video Summary & Insights</h2>
+            <div id="summaryContent" class="space-y-4 text-gray-300"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('processForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const youtube_url = document.getElementById('youtube_url').value;
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const summaryContent = document.getElementById('summaryContent');
+
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('meeting_id', 'youtube_video_' + Date.now());
+            formData.append('youtube_url', youtube_url);
+
+            try {
+                const response = await fetch('/api/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                loading.classList.add('hidden');
+
+                if(data.status === 'success') {
+                    results.classList.remove('hidden');
+                    const summary = data.summary;
+                    
+                    const takeawaysHtml = summary.key_takeaways && summary.key_takeaways.length > 0 
+                        ? summary.key_takeaways.map(t => `<li class="mb-1">${t}</li>`).join('')
+                        : '<li>None specified.</li>';
+
+                    const topicsHtml = summary.core_topics && summary.core_topics.length > 0
+                        ? summary.core_topics.map(tp => `<span class="bg-gray-700 text-red-300 text-xs px-2.5 py-1 rounded-full mr-2 mb-2 inline-block">${tp}</span>`).join('')
+                        : '<span class="text-gray-500">None specified</span>';
+
+                    summaryContent.innerHTML = `
+                        <div>
+                            <strong class="text-white text-lg">Video Overview:</strong> 
+                            <p class="mt-1 text-gray-300 leading-relaxed">${summary.video_overview}</p>
+                        </div>
+                        <div>
+                            <strong class="text-white text-lg">Core Topics:</strong> 
+                            <div class="mt-2 flex flex-wrap">${topicsHtml}</div>
+                        </div>
+                        <div>
+                            <strong class="text-white text-lg">Key Takeaways:</strong> 
+                            <ul class="list-disc pl-5 mt-2 space-y-1 text-gray-300">${takeawaysHtml}</ul>
+                        </div>
+                    `;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                alert('Request failed: ' + err);
+            }
+        });
+    </script>
+</body>
+</html>
