@@ -41,3 +41,13 @@ ai-meeting-assistant/
 ├── .env                        # Environment variables (git-ignored)
 ├── requirements.txt            # Python dependencies
 └── run.py                      # Flask server entry point
+
+## 📸 App Preview
+
+### 1. Home & URL Input Screen
+*Clean and modern dark-mode interface designed for instant video link ingestion.*
+![Home Screen](Assets/sc1.png)
+
+### 2. Video Summary & Insights
+*Instant breakdown featuring Video Overview, clickable Core Topics badges, and structured Key Takeaways.*
+![Summary Screen](Assets/sc2.png)
